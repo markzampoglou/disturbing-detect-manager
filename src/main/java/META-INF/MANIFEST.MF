@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+gr.iti.mklab.reveal.Main-Class: gr.iti.mklab.reveal.Main
+
