@@ -23,7 +23,7 @@ public class Manager {
 
     public Manager () {
         try {
-            Configuration.load(getClass().getResourceAsStream("/remote.properties"));
+            Configuration.load(getClass().getResourceAsStream("/docker.properties"));
 
             MongoClient mongoclient = new MongoClient(Configuration.MONGO_HOST, 27017);
             Morphia morphia = new Morphia();
