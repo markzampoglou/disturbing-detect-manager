@@ -23,7 +23,7 @@ public class Manager {
 
     public Manager () {
         try {
-            Configuration.load(getClass().getResourceAsStream("/docker.properties"));
+            Configuration.load(getClass().getResourceAsStream("/remote.properties"));
 
             MongoClient mongoclient = new MongoClient(Configuration.MONGO_HOST, 27017);
             Morphia morphia = new Morphia();
@@ -36,7 +36,6 @@ public class Manager {
             e.printStackTrace();
         }
     }
-
 
     // Suppress MongoDB logging
     static Logger root = (Logger) LoggerFactory
@@ -56,7 +55,6 @@ public class Manager {
                 ds.findAndDelete(ds.find(QueueObject.class).filter("id", submission.id));
                 calculator.submitTask(submission);
             }
-
             try {
                 QueueObject output = calculator.getThreadCalculationResult();
                 //System.out.println(output.sourceURL + String.valueOf(output.value));
@@ -87,7 +85,6 @@ public class Manager {
                     in.close();
 
                     System.out.println("Received: " + response.toString());
-
                 }
             }
             catch (Exception ex) {

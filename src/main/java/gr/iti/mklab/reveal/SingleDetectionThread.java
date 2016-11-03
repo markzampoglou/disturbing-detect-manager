@@ -56,6 +56,4 @@ public class SingleDetectionThread implements Callable<QueueObject>{
         in.close();
         return Double.valueOf(response.toString());
     }
-
-
 }
