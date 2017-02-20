@@ -2,17 +2,20 @@ package gr.iti.mklab.reveal;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
-import com.mongodb.MongoClient;
+import com.mongodb.*;
 import gr.iti.mklab.reveal.dnn.api.QueueObject;
 import org.mongodb.morphia.Datastore;
 import org.mongodb.morphia.Morphia;
 import org.mongodb.morphia.query.Query;
 import org.slf4j.LoggerFactory;
 
+import com.mongodb.MongoClient;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * Created by marzampoglou on 6/21/16.
@@ -24,12 +27,19 @@ public class Manager {
     public Manager () {
         try {
             Configuration.load(getClass().getResourceAsStream("/remote.properties"));
-
-            MongoClient mongoclient = new MongoClient(Configuration.MONGO_HOST, 27017);
+            System.out.println(Configuration.MONGO_URI);
+            MongoClientURI mongoURI = new MongoClientURI(Configuration.MONGO_URI);
+            MongoCredential credential = MongoCredential.createCredential ( Configuration.MONGO_USER, "admin", Configuration.MONGO_PASS.toCharArray());
+            MongoClient mongoclient = new MongoClient(new ServerAddress(Configuration.MONGO_HOST), Arrays.asList(credential));
             Morphia morphia = new Morphia();
             morphia.map(QueueObject.class);
             ds = new Morphia().createDatastore(mongoclient, "DisturbingQueue");
             ds.ensureCaps();
+            System.out.println("Will now get an item");
+
+            QueueObject report = ds.get(QueueObject.class, "testid");
+            System.out.println("Got it, beginning");
+
             begin();
 
         } catch (Exception e) {
@@ -46,6 +56,7 @@ public class Manager {
 
     public void begin() throws InterruptedException {
         ThreadManager calculator = new ThreadManager(Configuration.NUM_THREADS);
+
         Query<QueueObject> queue = ds.createQuery(QueueObject.class).limit(20).filter("processing",false);
         while (true) {
             if (queue.countAll() > 0 && calculator.canAcceptMoreTasks()) {
@@ -60,7 +71,7 @@ public class Manager {
                 //System.out.println(output.sourceURL + String.valueOf(output.value));
 
                 if (output!=null) {
-                    String URLString=Configuration.CRAWLER_HOST + "/mmapi/media/update/disturbing?collection=" + output.collection + "&url=" + output.sourceURL + "&score="+String.valueOf(output.value)+"&type="+output.type;
+                    String URLString=Configuration.CRAWLER_HOST + "/mmapi/media/update/disturbing?collection=" + output.collection + "&url=" + output.sourceURL + "&score="+String.valueOf(output.value)+ "&nsfwScore="+String.valueOf(output.value_nsfw) + "&type="+output.type;
                     if (output.itemId!=null){
                         URLString=URLString+ "&id=" + output.itemId;
                     }

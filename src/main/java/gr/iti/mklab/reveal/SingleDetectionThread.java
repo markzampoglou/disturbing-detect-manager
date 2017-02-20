@@ -27,13 +27,16 @@ public class SingleDetectionThread implements Callable<QueueObject>{
     @Override
     public QueueObject call() throws Exception {
         QueueObject output = input;
-        double value = classifyDisturbingImage();
-        output.value=value;
+        String value = classifyDisturbingImage();
+        String[] values=value.split(":");
+
+        output.value=Double.valueOf(values[0]);
+        output.value_nsfw=Double.valueOf(values[1]);
         output.processing=false;
         return output;
     }
 
-    public double classifyDisturbingImage() throws IOException {
+    public String classifyDisturbingImage() throws IOException {
 
         String queuedFilePath=Configuration.QUEUE_IMAGE_PATH + input.id + ".jpg";
         URL serviceUrl = new URL("http://localhost:5000/classify_violent?imagepath=" + queuedFilePath);
@@ -54,6 +57,7 @@ public class SingleDetectionThread implements Callable<QueueObject>{
             response.append(inputLine);
         }
         in.close();
-        return Double.valueOf(response.toString());
+
+        return response.toString();
     }
 }

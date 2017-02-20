@@ -15,5 +15,6 @@ public class QueueObject {
     public String itemId;
     public String type;
     public double value = 10000;
+    public double value_nsfw = 10000;
     public String collection;
 }
